@@ -1,6 +1,8 @@
 const User = require('./../models/userModel');
 const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
+
 exports.aliasTopUsers = (req, res, next) =>{
     req.query.limit = "5";
     req.query.sort="-ahmad,email";
@@ -45,9 +47,13 @@ exports.createUser = catchAsync(async (req, res , next) =>{
 });
 
 
-exports.getUser = catchAsync(async(req, res ) =>{
+exports.getUser = catchAsync(async(req, res,next ) =>{
         const user = await User.findById(req.params.id);
         // User.findOne({ _id: req.params.id}) same thing
+        if(!user)
+        {
+            return next(new AppError('No user found with that ID', 404));
+        }
         res.status(200).json({
             status:'success',
             data:{
@@ -57,11 +63,13 @@ exports.getUser = catchAsync(async(req, res ) =>{
 });
 
 // update = patch
-exports.updateUser = catchAsync(async(req, res ) =>{
+exports.updateUser = catchAsync(async(req, res,next ) =>{
         const user = await User.findByIdAndUpdate(req.params.id, req.body,{
             new:true,
             runValidators: true
         });
+
+       
         res.status(200).json({
             status:'success',
             data:{
@@ -71,8 +79,13 @@ exports.updateUser = catchAsync(async(req, res ) =>{
    
 });
 
-exports.deleteUser = catchAsync(async(req, res ) =>{
-        await User.findByIdAndDelete(req.params.id);
+exports.deleteUser = catchAsync(async(req, res,next ) =>{
+        const user = await User.findByIdAndDelete(req.params.id);
+        if(!user)
+        {
+            return next(new AppError('No user found with that ID', 404));
+        }
+
         res.status(200).json({
             status:'success',
             data:null
@@ -80,7 +93,7 @@ exports.deleteUser = catchAsync(async(req, res ) =>{
   
 });
 
-exports.getUserStats = catchAsync(async (req, res, nex)=>{
+exports.getUserStats = catchAsync(async (req, res, next)=>{
         const stats = await User.aggregate(
             [
                 {
@@ -115,7 +128,7 @@ exports.getUserStats = catchAsync(async (req, res, nex)=>{
     
 });
 
-exports.getMonthlyPlan = catchAsync( async (req, res) =>{
+exports.getMonthlyPlan = catchAsync( async (req, res,next) =>{
         const year = req.params.year * 1;
         
         const plan = await User.aggregate([
