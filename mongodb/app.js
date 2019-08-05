@@ -3,8 +3,14 @@
 const express = require('express');
 const app = express();
 const userRouter = require('./routers/userRoutes');
+const morgan = require('morgan');
+
 
 //middleware
+if(process.env.NODE_ENV === 'development')
+{
+    app.use(morgan('dev'));
+}
 app.use(express.json());
 
 // server
@@ -14,6 +20,15 @@ app.get('/',(req,res)=>{
 })
 //routes
 app.use('/api/v1/users',userRouter);
+
+// handling unhandled routes
+app.all('*',(req, res, next) =>{
+    res.status(404).json({
+        status:'fail',
+        message: `Can't find ${req.originalUrl} on this server!!`
+    });
+});
+
 
 
 module.exports = app;
