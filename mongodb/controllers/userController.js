@@ -120,15 +120,95 @@ exports.deleteUser = async(req, res ) =>{
    }
 };
 
+exports.getUserStats = async (req, res, nex)=>{
+    try{
+        const stats = await User.aggregate(
+            [
+                {
+                    $match:{ phone: { $gte:22}}
+                },
+                {
+                   $group:
+                   {
+                       _id: {$toUpper: '$name'},
+                       num: { $sum: 1 },
+                       avgPhone:{ $avg: '$phone'},
+                       minPhone:{ $min: '$phone'},
+                       maxPhone:{ $max: '$phone'},
+                      
+                   }
+                },
+               {
+                   $sort:{avgPhone : 1} ,
+               },
+               {
+                   $match:{_id: {$ne: 'EASY'}}
+               }
+            ]);
 
-// // test the model
-// const testUser = new User({
-//     name:'sabbah',
-//     email:'admin@gmail.com',
-//     phone:8272832
-// });
-// testUser.save().then(doc=>{
-//     console.log(doc);
-// }).catch(err=>{
-//     console.log('ERROR :', err)
-// });
+            res.status(200).json({
+                stats: 'success',
+                data:{
+                    stats
+                }
+            })
+
+    }catch(err){
+        res.status(404).json({
+            status:'fail',
+            message: err
+        });
+    }
+}
+
+exports.getMonthlyPlan = async (req, res) =>{
+    try{
+        const year = req.params.year * 1;
+        
+        const plan = await User.aggregate([
+            {
+                $unwind: '$startDates'
+            },
+            {
+                $match: {
+                    startDates:{
+                        $gte: new Date(`${year}-01-01`),
+                        $lte: new Date(`${year}-12-31`)
+                    }
+                }
+            },
+            {
+                $group:{
+                    _id:{ $month: '$startDates'},
+                    numUserStarts:{ $add: 1},
+                    users:{ $push: '$name'}
+                }
+            },
+            {
+                $addFields: { month: '$_id'}
+            },
+            {
+                $project:{
+                    _id: 0
+                }
+            },
+            {
+                $sort:{ numUsersStarts: -1}
+            }
+        ]);
+
+        res.status(200).json({
+            stats: 'success',
+            data:{
+                plan
+            }
+        });
+
+    }catch(err)
+    {
+        res.status(404).json({
+            status:'fail',
+            message: err
+        });
+    }
+}

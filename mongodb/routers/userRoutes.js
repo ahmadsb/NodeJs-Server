@@ -8,6 +8,9 @@ router
     .route('/top-5-cheap')
     .get(userController.aliasTopUsers,userController.getAllUsers);
 
+router.route('/user-stats').get(userController.getUserStats);
+router.route('/monthly-plan/:year').get(userController.getUserStats);
+
 router
     .route('/')
     .get(userController.getAllUsers)
