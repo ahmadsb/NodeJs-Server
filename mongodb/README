@@ -1,0 +1,4 @@
+to install all packages
+run : npm install
+
+to run server: npm run start
