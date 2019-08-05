@@ -2,3 +2,5 @@ to install all packages
 run : npm install
 
 to run server: npm run start
+
+to run debug (ndb): npm run debug
