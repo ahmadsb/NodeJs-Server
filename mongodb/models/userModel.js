@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
-// name, email, photo, password, passwordConfirm
+
+const crybto = require('crypto');
+
 const userSchema = new mongoose.Schema({
-    // name:String, it's simple 
     name:{
         type:String,
         required: [true, 'Please, tell us your name!'],
@@ -24,6 +25,11 @@ const userSchema = new mongoose.Schema({
           }
     },
     photo: String,
+    role:{
+        type:String,
+        enum:['user', 'guide', 'lead-guide', 'admin'],
+        default: 'user'
+    },
     password:{
         type: String,
         required:[true, 'Please, provide a password'],
@@ -41,7 +47,9 @@ const userSchema = new mongoose.Schema({
             message: 'Passwords are not the same!'
         }
     },
-    passwordChangedAt: Date
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date
 });
 
 //to hash the password
@@ -72,6 +80,17 @@ userSchema.methods.changedPasswordAfter = function(JWTTimestamp){
     return JWTTimestamp < changedTimestamp;
 };
 
+userSchema.methods.createPasswordRestToken = function(){
+    const resetToken = crybto.randomBytes(32).toString('hex');
+    this.passwordResetToken = crybto
+        .createHash('sha256')
+        .update(resetToken)
+        .digest('hex');
+    console.log({resetToken}, this.passwordResetToken);
+    this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+    return resetToken;
+};
 const User = mongoose.model('User',userSchema);
 
 module.exports = User;

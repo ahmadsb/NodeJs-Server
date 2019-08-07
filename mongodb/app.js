@@ -12,7 +12,7 @@ if(process.env.NODE_ENV === 'development')
     app.use(morgan('dev'));
 }
 app.use(express.json());
-
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
 
 app.use((req, res, next) =>{
