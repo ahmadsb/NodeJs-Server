@@ -14,7 +14,22 @@ const signToken = id =>{
 
 const createSendToken = (user, statusCode, res) =>{
     const token = signToken(user._id);
-    
+
+    const cookueOptions = {
+        expires: new Date(
+            Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+        ),
+        secure: true,
+        httpOnly: true
+    };
+
+    if(process.env.NODE_ENV === 'producation') 
+         cookueOptions.secure = true;
+    res.cookie('jwt', token, cookueOptions);
+
+    // remove password from output
+    user.password = undefined;
+
     res.status(statusCode).json({
         status:'success',
         token,
