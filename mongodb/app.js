@@ -2,15 +2,27 @@
 
 const express = require('express');
 const app = express();
+const rateLimit = require('express-rate-limit');
+
 const userRouter = require('./routers/userRoutes');
 const morgan = require('morgan');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
-//middleware
-if(process.env.NODE_ENV === 'development')
-{
+
+
+// 1) GLOBAL MIDDLEWARES
+if(process.env.NODE_ENV === 'development'){
     app.use(morgan('dev'));
 }
+
+const limiter = rateLimit({
+    max: 100,// max number http request
+    windowMs: 60 * 60 * 1000,//min. sec. msec.
+    message: 'Too many requests fromt his IP, please try agin in an hour!'
+});
+
+app.use('/api',limiter);
+
 app.use(express.json());
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
