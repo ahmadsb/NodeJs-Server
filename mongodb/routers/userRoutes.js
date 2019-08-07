@@ -8,6 +8,8 @@ const router = express.Router();
 
 router
     .post('/signup',authController.signup);
+router
+    .post('/login',authController.login);
 
 // router
 //     .route('/top-5-cheap')
