@@ -17,12 +17,22 @@ router.patch(
     authController.protect,
     authController.updatePassword
 );
-// router
-//     .route('/top-5-cheap')
-//     .get(userController.aliasTopUsers,userController.getAllUsers);
 
-// router.route('/user-stats').get(userController.getUserStats);
-// router.route('/monthly-plan/:year').get(userController.getUserStats);
+router
+    .patch(
+    '/updateMe',
+    authController.protect,
+    userController.updateMe
+);
+
+router
+    .delete(
+    '/deleteMe',
+    authController.protect,
+    userController.deleteMe
+);
+
+
 
 router
     .route('/')

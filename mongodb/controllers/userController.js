@@ -3,13 +3,13 @@ const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 
-
-// exports.aliasTopUsers = (req, res, next) =>{
-//     req.query.limit = "5";
-//     req.query.sort="-ahmad,email";
-//     req.query.fields = "name,email,phone";
-//     next();
-// };
+const filterObj = (obj, ...allwoedFields) =>{
+    let newObj = {};
+    Object.keys(obj).forEach(el =>{
+        if(allwoedFields.includes(el)) newObj[el] = obj[el];
+    });
+    return newObj;
+};
 
 exports.getAllUsers = catchAsync(async (req, res,next) =>{
 
@@ -46,6 +46,40 @@ exports.createUser = catchAsync(async (req, res , next) =>{
    
 });
 
+exports.updateMe =  catchAsync(async (req, res, next) =>{
+    // 1) Create error if user POSTs password data
+    if( req.body.password || req.body.passwordConfirm){
+        return next(
+            new AppError(
+                'this route is not for password update. Please user /updateMyPassword',
+                400
+            )
+        );
+    }
+    // 2) filtered out unwanted fields names that are not allowed to be updated
+    const filteredBody = filterObj(req.body, 'name', 'email', 'role');
+    
+    // 3)Update user document
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody,{
+        new:true,
+        runValidators: true
+    });
+
+    res.status(200).json({
+        status:'success',
+        user:updatedUser
+    })
+});
+
+exports.deleteMe = catchAsync(async (req, res, next) =>{
+    console.log(req.body,'asdasdasd');
+    await User.findByIdAndUpdate(req.user.id, {active: false});
+
+    res.status(204).json({
+        status:'success',
+        data: null
+    });
+});
 
 exports.getUser = catchAsync(async(req, res,next ) =>{
         const user = await User.findById(req.params.id);
@@ -90,83 +124,3 @@ exports.deleteUser = catchAsync(async(req, res,next ) =>{
         })
   
 });
-
-// exports.getUserStats = catchAsync(async (req, res, next)=>{
-//         const stats = await User.aggregate(
-//             [
-//                 {
-//                     $match:{ phone: { $gte:22}}
-//                 },
-//                 {
-//                    $group:
-//                    {
-//                        _id: {$toUpper: '$name'},
-//                        num: { $sum: 1 },
-//                        avgPhone:{ $avg: '$phone'},
-//                        minPhone:{ $min: '$phone'},
-//                        maxPhone:{ $max: '$phone'},
-                      
-//                    }
-//                 },
-//                {
-//                    $sort:{avgPhone : 1} ,
-//                },
-//                {
-//                    $match:{_id: {$ne: 'EASY'}}
-//                }
-//             ]);
-
-//             res.status(200).json({
-//                 stats: 'success',
-//                 data:{
-//                     stats
-//                 }
-//             })
-
-    
-// });
-
-// exports.getMonthlyPlan = catchAsync( async (req, res,next) =>{
-//         const year = req.params.year * 1;
-        
-//         const plan = await User.aggregate([
-//             {
-//                 $unwind: '$startDates'
-//             },
-//             {
-//                 $match: {
-//                     startDates:{
-//                         $gte: new Date(`${year}-01-01`),
-//                         $lte: new Date(`${year}-12-31`)
-//                     }
-//                 }
-//             },
-//             {
-//                 $group:{
-//                     _id:{ $month: '$startDates'},
-//                     numUserStarts:{ $add: 1},
-//                     users:{ $push: '$name'}
-//                 }
-//             },
-//             {
-//                 $addFields: { month: '$_id'}
-//             },
-//             {
-//                 $project:{
-//                     _id: 0
-//                 }
-//             },
-//             {
-//                 $sort:{ numUsersStarts: -1}
-//             }
-//         ]);
-
-//         res.status(200).json({
-//             stats: 'success',
-//             data:{
-//                 plan
-//             }
-//         });
-
-  
-// });

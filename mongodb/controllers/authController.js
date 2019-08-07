@@ -23,6 +23,7 @@ const createSendToken = (user, statusCode, res) =>{
         }
     })
 };
+
 exports.signup = catchAsync(async(req, res, next) =>{
     const newUser = await User.create(req.body);
     createSendToken(newUser, 201, res);
@@ -82,7 +83,7 @@ exports.restrictTo = (...roles) => {
     return (req, res, next) =>{
         if(!roles.includes(req.user.role)){
             return next(new 
-                AppError('You do not have oermission to perform this action', 403));
+                AppError('You do not have permission to perform this action', 403));
         };
         next();
     };
@@ -127,7 +128,6 @@ exports.forgotPassword =catchAsync(async (req, res, next) =>{
     }
     
 });
-
 exports.resetPassword = catchAsync( async(req, res, next) =>{
     // 1) Get user based on the token
     const hashedToken = crypto
