@@ -1,24 +1,59 @@
 const mongoose = require('mongoose');
-
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
+// name, email, photo, password, passwordConfirm
 const userSchema = new mongoose.Schema({
     // name:String, it's simple 
     name:{
         type:String,
-        required: [true, 'must have a name'],
-        unique:true
+        required: [true, 'Please, tell us your name!'],
     },
     email:{
         type:String,
-        required: [true, 'must have a email'],
-        unique:true
+        required: [true, 'Please, provide your email'],
+        unique:true,
+        lowercase:true,
+        validate:[validator.isEmail, 'Please, provide a valid email']
     },
     phone:{
-        type:Number,
-        // default:4.5,
-        required: [true, 'must have a phone number'],
-        unique:true
-    }, 
+        type:String,
+        required: [true, 'Please, provide your phone number'],
+        unique:true,
+        validator: function(v) {
+            return /\d{3}-\d{3}-\d{4}/.test(v);
+          }
+    },
+    photo: String,
+    password:{
+        type: String,
+        required:[true, 'Please, provide a password'],
+        minlength: 8
+    },
+    passwordConfirm:{
+        type: String,
+        required:[true, 'Please, confirm your password'],
+        //This only works on CREATE and SAVE
+        validate:{
+            validator: function(el){
+                return el === this.password;
+            },
+            message: 'Passwords are not the same!'
+        }
+    }
 });
+
+//to hash the password
+userSchema.pre('save', async function(next){
+    //only run this function if password was actually modified
+    if(!this.isModified('password'))
+        return next();
+    // Hash the password with cost of 12
+    this.password = await bcrypt.hash(this.password, 12);// returns a promise
+    // Delete passwordConfirm field
+    this.passwordConfirm = undefined;
+    next();
+});
+
 const User = mongoose.model('User',userSchema);
 
 module.exports = User;

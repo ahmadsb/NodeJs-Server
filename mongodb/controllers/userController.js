@@ -3,15 +3,15 @@ const APIFeatures = require('./../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 
-exports.aliasTopUsers = (req, res, next) =>{
-    req.query.limit = "5";
-    req.query.sort="-ahmad,email";
-    req.query.fields = "name,email,phone";
-    next();
-};
 
+// exports.aliasTopUsers = (req, res, next) =>{
+//     req.query.limit = "5";
+//     req.query.sort="-ahmad,email";
+//     req.query.fields = "name,email,phone";
+//     next();
+// };
 
-exports.getAllUsers = catchAsync(async (req, res ) =>{
+exports.getAllUsers = catchAsync(async (req, res,next) =>{
 
         // EXECUTE QUERY
         const features = new APIFeatures(User.find(), req.query)
@@ -68,8 +68,6 @@ exports.updateUser = catchAsync(async(req, res,next ) =>{
             new:true,
             runValidators: true
         });
-
-       
         res.status(200).json({
             status:'success',
             data:{
@@ -93,82 +91,82 @@ exports.deleteUser = catchAsync(async(req, res,next ) =>{
   
 });
 
-exports.getUserStats = catchAsync(async (req, res, next)=>{
-        const stats = await User.aggregate(
-            [
-                {
-                    $match:{ phone: { $gte:22}}
-                },
-                {
-                   $group:
-                   {
-                       _id: {$toUpper: '$name'},
-                       num: { $sum: 1 },
-                       avgPhone:{ $avg: '$phone'},
-                       minPhone:{ $min: '$phone'},
-                       maxPhone:{ $max: '$phone'},
+// exports.getUserStats = catchAsync(async (req, res, next)=>{
+//         const stats = await User.aggregate(
+//             [
+//                 {
+//                     $match:{ phone: { $gte:22}}
+//                 },
+//                 {
+//                    $group:
+//                    {
+//                        _id: {$toUpper: '$name'},
+//                        num: { $sum: 1 },
+//                        avgPhone:{ $avg: '$phone'},
+//                        minPhone:{ $min: '$phone'},
+//                        maxPhone:{ $max: '$phone'},
                       
-                   }
-                },
-               {
-                   $sort:{avgPhone : 1} ,
-               },
-               {
-                   $match:{_id: {$ne: 'EASY'}}
-               }
-            ]);
+//                    }
+//                 },
+//                {
+//                    $sort:{avgPhone : 1} ,
+//                },
+//                {
+//                    $match:{_id: {$ne: 'EASY'}}
+//                }
+//             ]);
 
-            res.status(200).json({
-                stats: 'success',
-                data:{
-                    stats
-                }
-            })
+//             res.status(200).json({
+//                 stats: 'success',
+//                 data:{
+//                     stats
+//                 }
+//             })
 
     
-});
+// });
 
-exports.getMonthlyPlan = catchAsync( async (req, res,next) =>{
-        const year = req.params.year * 1;
+// exports.getMonthlyPlan = catchAsync( async (req, res,next) =>{
+//         const year = req.params.year * 1;
         
-        const plan = await User.aggregate([
-            {
-                $unwind: '$startDates'
-            },
-            {
-                $match: {
-                    startDates:{
-                        $gte: new Date(`${year}-01-01`),
-                        $lte: new Date(`${year}-12-31`)
-                    }
-                }
-            },
-            {
-                $group:{
-                    _id:{ $month: '$startDates'},
-                    numUserStarts:{ $add: 1},
-                    users:{ $push: '$name'}
-                }
-            },
-            {
-                $addFields: { month: '$_id'}
-            },
-            {
-                $project:{
-                    _id: 0
-                }
-            },
-            {
-                $sort:{ numUsersStarts: -1}
-            }
-        ]);
+//         const plan = await User.aggregate([
+//             {
+//                 $unwind: '$startDates'
+//             },
+//             {
+//                 $match: {
+//                     startDates:{
+//                         $gte: new Date(`${year}-01-01`),
+//                         $lte: new Date(`${year}-12-31`)
+//                     }
+//                 }
+//             },
+//             {
+//                 $group:{
+//                     _id:{ $month: '$startDates'},
+//                     numUserStarts:{ $add: 1},
+//                     users:{ $push: '$name'}
+//                 }
+//             },
+//             {
+//                 $addFields: { month: '$_id'}
+//             },
+//             {
+//                 $project:{
+//                     _id: 0
+//                 }
+//             },
+//             {
+//                 $sort:{ numUsersStarts: -1}
+//             }
+//         ]);
 
-        res.status(200).json({
-            stats: 'success',
-            data:{
-                plan
-            }
-        });
+//         res.status(200).json({
+//             stats: 'success',
+//             data:{
+//                 plan
+//             }
+//         });
 
   
-});
+// });

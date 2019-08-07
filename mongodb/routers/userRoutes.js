@@ -1,15 +1,20 @@
 
 
 const express = require('express');
-const userController = require('./../controllers/userController')
+const userController = require('./../controllers/userController');
+const authController = require('./../controllers/authController')
+
 const router = express.Router();
 
 router
-    .route('/top-5-cheap')
-    .get(userController.aliasTopUsers,userController.getAllUsers);
+    .post('/signup',authController.signup);
 
-router.route('/user-stats').get(userController.getUserStats);
-router.route('/monthly-plan/:year').get(userController.getUserStats);
+// router
+//     .route('/top-5-cheap')
+//     .get(userController.aliasTopUsers,userController.getAllUsers);
+
+// router.route('/user-stats').get(userController.getUserStats);
+// router.route('/monthly-plan/:year').get(userController.getUserStats);
 
 router
     .route('/')
