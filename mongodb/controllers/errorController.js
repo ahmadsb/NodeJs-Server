@@ -12,6 +12,8 @@ const sendErrorDev = (err, res) =>{
     });
 };
 
+const handleJWTError = err=> new AppError('Incalid token, please log in again!', 401);
+
 const sendErrorProd = (err, res) =>{
     if(err.isOperational){
         res.status(err.statusCode).json({
@@ -34,10 +36,9 @@ module.exports = (err, req, res,next) =>{
     if(process.env.NODE_ENV === 'development'){
         sendErrorDev(err, res);
     } else if(process.env.NODE_ENV === 'production'){
-        // let error = {...err};
-        // console.log(error);
-        // if(error.name === 'CastError') error = handleCastErrorDB(error);
-        
+        let error = {...err};
+        if(error.name === 'CastError') error = handleCastErrorDB(error);
+        if(error.name === 'JsonWebToken')  error = handleJWTError(erro);
         sendErrorProd(err, res);
     }
  

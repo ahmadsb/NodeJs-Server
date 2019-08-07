@@ -11,6 +11,7 @@ router
 router
     .post('/login',authController.login);
 
+
 // router
 //     .route('/top-5-cheap')
 //     .get(userController.aliasTopUsers,userController.getAllUsers);
@@ -20,7 +21,7 @@ router
 
 router
     .route('/')
-    .get(userController.getAllUsers)
+    .get(authController.protect, userController.getAllUsers)
     .post(userController.createUser);
 router
     .route('/:id')

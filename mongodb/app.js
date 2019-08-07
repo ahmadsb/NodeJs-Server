@@ -13,6 +13,13 @@ if(process.env.NODE_ENV === 'development')
 }
 app.use(express.json());
 
+
+
+app.use((req, res, next) =>{
+    console.log(req.headers);
+    next();
+})
+
 // server
 app.get('/',(req,res)=>{
     res.writeHead(200);
