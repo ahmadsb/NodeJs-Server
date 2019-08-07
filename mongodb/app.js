@@ -4,6 +4,9 @@ const express = require('express');
 const app = express();
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const userRouter = require('./routers/userRoutes');
 const morgan = require('morgan');
@@ -31,6 +34,23 @@ app.use('/api',limiter);
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb'}));
+
+// Data sanitization against NoSQL query injection
+//{"email":{$gt:""}} returns all to prevent it. we have to use mongoSanitize
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+// e.g. to read html code 
+app.use(xss());
+
+// Prevent parameter polluation
+app.use(hpp({
+    whitelist:[
+        'duration',
+        'price',
+        'anything'
+    ]
+}));
 
 // Serving static files 
 // app.use(express.static(`${__dirname}/public`))
