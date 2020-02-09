@@ -3,9 +3,12 @@ const dotenv= require('dotenv');
 const User = require('./../models/userModel')
 dotenv.config({path:'./config.env'})
 
-//connect to DATABASE  
-const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
-mongoose.connect(DB,{
+//connect to DATABASE hosting Atlas mongodb
+// const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
+// connect to DATABASE local
+const DB_local = process.env.DATABASE_LOCAL;
+
+mongoose.connect(DB_local,{
     useFindAndModify : true,
     useNewUrlParser : true,
     useFindAndModify : false,
